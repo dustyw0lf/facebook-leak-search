@@ -12,7 +12,6 @@ from bs4 import BeautifulSoup
 
 
 # CONFIG #################
-onion_service_address =
 tor_socks_proxy_port = 9050
 onion_service = {
 	'url':'4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion',
@@ -95,7 +94,34 @@ class FacebookLeakSearch():
 		if success == False: self.ask_for_captcha_solution()
 
 	def search():
-		# TODO: Implement actual search...
+		headers = {
+			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0',
+			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+			'Accept-Language': 'en-US,en;q=0.5',
+			'Referer': 'http://4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion/search?i=123&f=&l=&t=&w=&o=&s=1717070022&r=*any*&g=*any*',
+			'Connection': 'keep-alive',
+			'Upgrade-Insecure-Requests': '1',
+			'Sec-Fetch-Dest': 'document',
+			'Sec-Fetch-Mode': 'navigate',
+			'Sec-Fetch-Site': 'same-origin',
+			'Sec-Fetch-User': '?1',
+		}
+		i=123&f=first&l=last&t=12345678&w=work&o=location&s=1717070022&r=*any*&g=*any*
+
+		params = {
+			'i':'',
+			'f':'',
+			'l':'',
+			't':'',
+			'w':'',
+			'o':'',
+			'r':'',
+			'g':''
+		}
+
+		response = requests.get('http://4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion/search?', headers=headers)
+
+
 		pass
 
 
