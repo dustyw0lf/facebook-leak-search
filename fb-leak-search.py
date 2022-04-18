@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from prettytable import PrettyTable
 
 """
 	Facebook 2021 Leak Search
@@ -14,9 +15,17 @@ from bs4 import BeautifulSoup
 # CONFIG #################
 tor_socks_proxy_port = 9050
 onion_service = {
+	# URL of the Onion service
 	'url':'4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion',
+
 	# To find the captcha box, we search the HTML for the style attribute with following content.
-	'captcha_style':'border: 1px solid black;display: inline-block;margin: 0px; padding:0px;'
+	'captcha_style':'border: 1px solid black;display: inline-block;margin: 0px; padding:0px;',
+	
+	# Text which is shown on the page if a captcha is present
+	'captcha_present_text':'fill in captcha!',
+
+	# Results table style attribute content
+	'results_table_style':'min-width: 50%'
 }
 ##########################
 
@@ -44,6 +53,14 @@ class FacebookLeakSearch():
 		resp = self.session.get(self.hidden_service_url)
 		return resp.text
 
+	def is_captcha_present(self, source):
+		""" Checks if the captcha is present in the HTML source.
+		"""
+		if onion_service['captcha_present_text'] in source:
+			return True
+		else:
+			return False
+
 	def extract_captcha_from_source(self, source):
 		""" The HTML source gets passed and the captcha text + hidden key will be extracted from it.
 		"""
@@ -70,9 +87,9 @@ class FacebookLeakSearch():
 		# The new URL will be the same domain, but with a GET parameter 's' which acts as an identifier that we solved the captcha.
 		# All further requests must be made with the s parameter set, otherwise the captcha will show up again.
 		if resp.status_code == 302:
-			print("[*] Captcha correct!")
 			# Here we extract the ID from the response header
 			self.authentication_id = resp.headers['Location'].split('?s=')[1]
+			print("[*] Captcha correct! (Auth ID: {0})".format(self.authentication_id))
 			return True
 		else:
 			print("[!] The captcha solution was wrong! Try again.")
@@ -93,37 +110,64 @@ class FacebookLeakSearch():
 		# If the captcha is wrong, call the function again :)
 		if success == False: self.ask_for_captcha_solution()
 
-	def search():
-		headers = {
-			'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0',
-			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-			'Accept-Language': 'en-US,en;q=0.5',
-			'Referer': 'http://4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion/search?i=123&f=&l=&t=&w=&o=&s=1717070022&r=*any*&g=*any*',
-			'Connection': 'keep-alive',
-			'Upgrade-Insecure-Requests': '1',
-			'Sec-Fetch-Dest': 'document',
-			'Sec-Fetch-Mode': 'navigate',
-			'Sec-Fetch-Site': 'same-origin',
-			'Sec-Fetch-User': '?1',
-		}
-		i=123&f=first&l=last&t=12345678&w=work&o=location&s=1717070022&r=*any*&g=*any*
+	def ask_for_search_input(self):
+		print("[*] Please enter the search criteria (Leave blank if not needed):")
+		user_id = input("  > User ID: ")
+		first_name = input("  > First Name: ")
+		last_name = input("  > Last Name: ")
+		phone_number = input("  > Phone Number: ")
+		work = input("  > Work: ")
+		location = input("  > Location: ")
+		#relationship_status = input("[*] Relationship Status: ")
+		#gender = input("[*] Gender: ")
 
+		return self.perform_search(user_id, first_name, last_name, phone_number, work, location, relationship_status='*any*', gender='*any*')
+
+	def perform_search(self, user_id, first_name, last_name, phone_number, work, location, relationship_status, gender):
+		print("[*] Performing DB search")
 		params = {
-			'i':'',
-			'f':'',
-			'l':'',
-			't':'',
-			'w':'',
-			'o':'',
-			'r':'',
-			'g':''
+			's':self.authentication_id,
+			'i':user_id, # ID
+			'f':first_name, # firstname
+			'l':last_name, # lastname
+			't':phone_number, # phone number
+			'w':work, # work
+			'o':location, # location
+			'r':relationship_status, # relationship status
+			'g':gender  # gender
 		}
+		url = self.hidden_service_url+'/search'
+		resp = self.session.post(url, params=params, allow_redirects=False)
+		
+		return self.parse_results_table(resp.text)
 
-		response = requests.get('http://4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion/search?', headers=headers)
+	def parse_results_table(self, source):
 
+		results = []
+		soup = BeautifulSoup(source, 'html.parser')
+		
+		# get the table with the results
+		table_rows = soup.find_all('tr')
 
-		pass
+		for row in table_rows[1:]:
+			tds = row.find_all('td')
 
+			entry = {}
+			entry['user_id'] = tds[0].text
+			entry['phone_number'] = tds[1].text
+			entry['first_name'] = tds[2].text
+			entry['last_name'] = tds[3].text
+			entry['gender'] = tds[4].text
+			entry['relationship_status'] = tds[5].text
+			entry['work'] = tds[6].text
+			entry['hometown'] = tds[7].text
+			entry['location'] = tds[8].text
+			entry['country'] = tds[9].text
+			results.append(entry)
+
+		print("[*] Success! {0} results have been found!".format(len(results)))
+
+		return results
 
 def banner():
 	print(" ________  ______   _____      ______   ")
@@ -135,19 +179,52 @@ def banner():
 	print()
 	print("Facebook Leak Search - Author: @curosim")
 	print()
+	"""
 	print("IMPORTANT NOTICE:")
 	print("This script is simply a CLI wrapper for the following TOR hidden service:")
 	print(onion_service['url'])
 	print("The author of the script has no affiliation with the operator of the hidden service.")
 	print()
+	"""
 
 def main():
 	banner()
 	fbls = FacebookLeakSearch(onion_service['url'])
 	print('[!] To use the service, you have to solve a captcha first.')
 	fbls.ask_for_captcha_solution()
-	print('[*] Authentication ID: %s' % str(fbls.authentication_id))
-	fbls.search()
+	results = fbls.ask_for_search_input()
+
+	results_table = PrettyTable()
+	results_table.field_names = ["User ID", "Phone", "Name", "Lastname", "Gender", "Work", "Hometown", "Location", "Country"]
+	results_table.align = 'l'
+
+	for result in results:
+		results_table.add_row(
+			[
+				result['user_id'],
+				result['phone_number'],
+				result['first_name'],
+				result['last_name'],
+				result['gender'],
+				result['work'],
+				result['hometown'],
+				result['location'],
+				result['country']
+			]
+		)
+
+
+	print(results_table)
+
+	"""
+	TODO:
+	- Implement way to show how many search queries are left (it's in the page source)
+	- Automatic re-auth of captcha after 50 queries used
+	- Possibility of solving multiple captchas at first and the script changing keys on-the-fly
+	- Possibility of processing lists
+
+
+	"""
 
 
 if __name__ == '__main__':
