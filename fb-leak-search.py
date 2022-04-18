@@ -179,13 +179,6 @@ def banner():
 	print()
 	print("Facebook Leak Search - Author: @curosim")
 	print()
-	"""
-	print("IMPORTANT NOTICE:")
-	print("This script is simply a CLI wrapper for the following TOR hidden service:")
-	print(onion_service['url'])
-	print("The author of the script has no affiliation with the operator of the hidden service.")
-	print()
-	"""
 
 def main():
 	banner()
@@ -212,7 +205,6 @@ def main():
 				result['country']
 			]
 		)
-
 
 	print(results_table)
 
