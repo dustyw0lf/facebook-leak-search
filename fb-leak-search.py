@@ -218,9 +218,10 @@ def main():
 
 	"""
 	TODO:
+	- Maybe add way to save results to DB for further browsing
 	- Implement way to show how many search queries are left (it's in the page source)
 	- Automatic re-auth of captcha after 50 queries used
-	- Possibility of solving multiple captchas at first and the script changing keys on-the-fly
+	- Possibility of solving multiple captchas at first and key rotation afterwards
 	- Possibility of processing lists
 	- Implement Facebook Profile URL to ID converter
 
