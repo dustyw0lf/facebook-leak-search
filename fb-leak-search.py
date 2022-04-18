@@ -222,7 +222,7 @@ def main():
 	- Automatic re-auth of captcha after 50 queries used
 	- Possibility of solving multiple captchas at first and the script changing keys on-the-fly
 	- Possibility of processing lists
-
+	- Implement Facebook Profile URL to ID converter
 
 	"""
 
