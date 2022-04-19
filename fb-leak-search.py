@@ -210,6 +210,10 @@ def main():
 
 	"""
 	TODO:
+	- Separate CLI from API Interactions (2 Classes)
+	- Implement Key Rotation for Authentication ID
+
+	Additional Features:
 	- Maybe add way to save results to DB for further browsing
 	- Implement way to show how many search queries are left (it's in the page source)
 	- Automatic re-auth of captcha after 50 queries used
