@@ -165,8 +165,6 @@ class FacebookLeakSearch():
 			entry['country'] = tds[9].text
 			results.append(entry)
 
-		print("[*] Success! {0} results have been found!".format(len(results)))
-
 		return results
 
 def banner():
@@ -187,26 +185,32 @@ def main():
 	fbls.ask_for_captcha_solution()
 	results = fbls.ask_for_search_input()
 
-	results_table = PrettyTable()
-	results_table.field_names = ["User ID", "Phone", "Name", "Lastname", "Gender", "Work", "Hometown", "Location", "Country"]
-	results_table.align = 'l'
 
-	for result in results:
-		results_table.add_row(
-			[
-				result['user_id'],
-				result['phone_number'],
-				result['first_name'],
-				result['last_name'],
-				result['gender'],
-				result['work'],
-				result['hometown'],
-				result['location'],
-				result['country']
-			]
-		)
 
-	print(results_table)
+	if len(results) == 0:
+		print("[*] The search was successful but it returned 0 results :(")
+	else:
+		print("[*] Success! {0} results have been found!".format(len(results)))
+		results_table = PrettyTable()
+		results_table.field_names = ["User ID", "Phone", "Name", "Lastname", "Gender", "Work", "Hometown", "Location", "Country"]
+		results_table.align = 'l'
+
+		for result in results:
+			results_table.add_row(
+				[
+					result['user_id'],
+					result['phone_number'],
+					result['first_name'],
+					result['last_name'],
+					result['gender'],
+					result['work'],
+					result['hometown'],
+					result['location'],
+					result['country']
+				]
+			)
+
+		print(results_table)
 
 	"""
 	TODO:
