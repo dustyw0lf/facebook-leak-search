@@ -11,7 +11,6 @@ from prettytable import PrettyTable
 	The captcha on the website is lovely - because of that and out of respect for the service operator, it's implemented in the script instead of solved automatically.
 """
 
-
 # CONFIG #################
 tor_socks_proxy_port = 9050
 onion_service = {
@@ -36,8 +35,8 @@ def get_tor_session():
 	session = requests.session()
 
 	# It's important to use the protocol 'socks5h' in order to enable remote DNS resolving
-	session.proxies['http'] = 'socks5h://localhost:9050'.format(tor_socks_proxy_port)
-	session.proxies['https'] = 'socks5h://localhost:9050'.format(tor_socks_proxy_port)
+	session.proxies['http'] = 'socks5h://localhost:{0}'.format(tor_socks_proxy_port)
+	session.proxies['https'] = 'socks5h://localhost:{0}'.format(tor_socks_proxy_port)
 	return session
 
 class FacebookLeakSearch():
@@ -72,8 +71,6 @@ class FacebookLeakSearch():
 	def solve_captcha(self, captcha_text, hidden_key):
 		""" Solve the captcha (Send solution to server).
 		"""
-
-		print("[*] Submitting captcha solution '{0}'".format(captcha_text))
 		
 		data = {
 			'captcha': captcha_text,
@@ -89,42 +86,11 @@ class FacebookLeakSearch():
 		if resp.status_code == 302:
 			# Here we extract the ID from the response header
 			self.authentication_id = resp.headers['Location'].split('?s=')[1]
-			print("[*] Captcha correct! (Auth ID: {0})".format(self.authentication_id))
 			return True
 		else:
-			print("[!] The captcha solution was wrong! Try again.")
 			return False
 
-	def ask_for_captcha_solution(self, source=None):
-		""" Ask the user to solve the captcha.
-			It's a recursive function.
-		"""
-
-		if source is None: source = self.initial_request()
-
-		captcha_text, hidden_key = self.extract_captcha_from_source(source)
-		print(captcha_text)
-		captcha_solution = input('[*] Enter the letters: ')
-		success = self.solve_captcha(captcha_solution, hidden_key)
-
-		# If the captcha is wrong, call the function again :)
-		if success == False: self.ask_for_captcha_solution()
-
-	def ask_for_search_input(self):
-		print("[*] Please enter the search criteria (Leave blank if not needed):")
-		user_id = input("  > User ID: ")
-		first_name = input("  > First Name: ")
-		last_name = input("  > Last Name: ")
-		phone_number = input("  > Phone Number: ")
-		work = input("  > Work: ")
-		location = input("  > Location: ")
-		#relationship_status = input("[*] Relationship Status: ")
-		#gender = input("[*] Gender: ")
-
-		return self.perform_search(user_id, first_name, last_name, phone_number, work, location, relationship_status='*any*', gender='*any*')
-
-	def perform_search(self, user_id, first_name, last_name, phone_number, work, location, relationship_status, gender):
-		print("[*] Performing DB search")
+	def perform_search(self, user_id, first_name, last_name, phone_number, work, location, relationship_status='*any*', gender='*any*'):
 		params = {
 			's':self.authentication_id,
 			'i':user_id, # ID
@@ -167,6 +133,70 @@ class FacebookLeakSearch():
 
 		return results
 
+class CommandLineInterface():
+
+	def __init__(self, fls):
+		self.fls = fls
+
+	def ask_for_captcha_solution(self, source=None):
+		""" Ask the user to solve the captcha.
+			It's a recursive function.
+		"""
+
+		if source is None:
+			print('[!] To use the service, you have to solve a captcha first.')
+			source = self.fls.initial_request()
+
+		captcha_text, hidden_key = self.fls.extract_captcha_from_source(source)
+		print(captcha_text)
+		captcha_solution = input('[*] Enter the letters: ')
+		print("[*] Submitting captcha solution '{0}'".format(captcha_text))
+		if self.fls.solve_captcha(captcha_solution, hidden_key) == True:
+			print("[*] Captcha correct! (Auth ID: {0})".format(self.fls.authentication_id))
+		else:
+			print("[!] The captcha solution was wrong! Try again.")
+			self.ask_for_captcha_solution()
+
+	def ask_for_search_params(self):
+		print("[*] Please enter the search criteria (Leave blank if not needed):")
+		user_id = input("  > User ID: ")
+		first_name = input("  > First Name: ")
+		last_name = input("  > Last Name: ")
+		phone_number = input("  > Phone Number: ")
+		work = input("  > Work: ")
+		location = input("  > Location: ")
+		#relationship_status = input("[*] Relationship Status: ")
+		#gender = input("[*] Gender: ")
+
+		return user_id, first_name, last_name, phone_number, work, location
+
+	def present_results(self, search_results):
+		if len(search_results) == 0:
+			print("[*] The search was successful but it returned 0 results :(")
+		else:
+			print("[*] Success! {0} results have been found!".format(len(results)))
+			results_table = PrettyTable()
+			results_table.field_names = ["User ID", "Phone", "Name", "Lastname", "Gender", "Work", "Hometown", "Location", "Country"]
+			results_table.align = 'l'
+
+			for result in results:
+				results_table.add_row(
+					[
+						result['user_id'],
+						result['phone_number'],
+						result['first_name'],
+						result['last_name'],
+						result['gender'],
+						result['work'],
+						result['hometown'],
+						result['location'],
+						result['country']
+					]
+				)
+
+			print(results_table)
+
+
 def banner():
 	print(" ________  ______   _____      ______   ")
 	print("|_   __  ||_   _ \\ |_   _|   .' ____ \\  ")
@@ -180,37 +210,21 @@ def banner():
 
 def main():
 	banner()
-	fbls = FacebookLeakSearch(onion_service['url'])
-	print('[!] To use the service, you have to solve a captcha first.')
-	fbls.ask_for_captcha_solution()
-	results = fbls.ask_for_search_input()
 
+	fls = FacebookLeakSearch(onion_service['url'])
+	cli = CommandLineInterface(fls=fls)
 
+	cli.ask_for_captcha_solution()
+	search_params = cli.ask_for_search_params()
 
-	if len(results) == 0:
-		print("[*] The search was successful but it returned 0 results :(")
-	else:
-		print("[*] Success! {0} results have been found!".format(len(results)))
-		results_table = PrettyTable()
-		results_table.field_names = ["User ID", "Phone", "Name", "Lastname", "Gender", "Work", "Hometown", "Location", "Country"]
-		results_table.align = 'l'
+	print("[*] Performing DB search")
+	search_results = self.fls.perform_search(
+		search_params*,
+		relationship_status='*any*',
+		gender='*any*'
+	)
 
-		for result in results:
-			results_table.add_row(
-				[
-					result['user_id'],
-					result['phone_number'],
-					result['first_name'],
-					result['last_name'],
-					result['gender'],
-					result['work'],
-					result['hometown'],
-					result['location'],
-					result['country']
-				]
-			)
-
-		print(results_table)
+	cli.present_results(search_results)
 
 	"""
 	TODO:
