@@ -108,6 +108,8 @@ class FacebookLeakSearch():
 		return self.parse_results_table(resp.text)
 
 	def parse_results_table(self, source):
+		""" Parse HTML and extract the results from the <table> rows.
+		"""
 
 		results = []
 		soup = BeautifulSoup(source, 'html.parser')
@@ -140,7 +142,7 @@ class CommandLineInterface():
 
 	def ask_for_captcha_solution(self, source=None):
 		""" Ask the user to solve the captcha.
-			It's a recursive function.
+			It's a recursive function, in case the captcha solution is wrong.
 		"""
 
 		if source is None:
@@ -158,6 +160,9 @@ class CommandLineInterface():
 			self.ask_for_captcha_solution()
 
 	def ask_for_search_params(self):
+		""" Ask the user for search parameters.
+		"""
+
 		print("[*] Please enter the search criteria (Leave blank if not needed):")
 		user_id = input("  > User ID: ")
 		first_name = input("  > First Name: ")
@@ -168,9 +173,12 @@ class CommandLineInterface():
 		#relationship_status = input("[*] Relationship Status: ")
 		#gender = input("[*] Gender: ")
 
-		return user_id, first_name, last_name, phone_number, work, location
+		return (user_id, first_name, last_name, phone_number, work, location)
 
 	def present_results(self, search_results):
+		""" Displays the search results in a pretty CLI table :)
+		"""
+
 		if len(search_results) == 0:
 			print("[*] The search was successful but it returned 0 results :(")
 		else:
@@ -218,11 +226,7 @@ def main():
 	search_params = cli.ask_for_search_params()
 
 	print("[*] Performing DB search")
-	search_results = self.fls.perform_search(
-		search_params*,
-		relationship_status='*any*',
-		gender='*any*'
-	)
+	search_results = self.fls.perform_search(**search_params)
 
 	cli.present_results(search_results)
 
