@@ -48,8 +48,18 @@ class DatabaseOperations():
 		self.db.commit()
 		return self.cursor.lastrowid
 
-	def update_authentication_key_info(self):
+	def update_authentication_key(self):
 		pass
+
+	def get_authentication_key(self, entry_id=None)
+		if entry_id != None:
+			self.cursor.execute('''SELECT * FROM authentication_keys WHERE search_quota_left > 0''')
+        	authentication_key = self.cursor.fetchone()
+        else:
+			self.cursor.execute('''SELECT * FROM authentication_keys WHERE id =?''', (entry_id))
+			authentication_key = self.cursor.fetchone()
+		self.db.commit()
+		return authentication_key
 
 	def insert_single_search_result(self):
 		pass
