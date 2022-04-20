@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from prettytable import PrettyTable
+import db
 
 """
 	Facebook 2021 Leak Search
@@ -219,6 +220,7 @@ def banner():
 def main():
 	banner()
 
+	dbops = db.DatabaseOperations()
 	fls = FacebookLeakSearch(onion_service['url'])
 	cli = CommandLineInterface(fls=fls)
 
