@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from prettytable import PrettyTable
-import db
+from db import *
 
 """
 	Facebook 2021 Leak Search
@@ -14,6 +14,7 @@ import db
 
 # CONFIG #################
 tor_socks_proxy_port = 9050
+db_file = 'db.sqlite3'
 onion_service = {
 	# URL of the Onion service
 	'url':'4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion',
@@ -153,7 +154,7 @@ class CommandLineInterface():
 		captcha_text, hidden_key = self.fls.extract_captcha_from_source(source)
 		print(captcha_text)
 		captcha_solution = input('[*] Enter the letters: ')
-		print("[*] Submitting captcha solution '{0}'".format(captcha_text))
+		print("[*] Submitting captcha solution '{0}'".format(captcha_solution))
 		if self.fls.solve_captcha(captcha_solution, hidden_key) == True:
 			print("[*] Captcha correct! (Auth ID: {0})".format(self.fls.authentication_id))
 		else:
@@ -183,12 +184,12 @@ class CommandLineInterface():
 		if len(search_results) == 0:
 			print("[*] The search was successful but it returned 0 results :(")
 		else:
-			print("[*] Success! {0} results have been found!".format(len(results)))
+			print("[*] Success! {0} results have been found!".format(len(search_results)))
 			results_table = PrettyTable()
 			results_table.field_names = ["User ID", "Phone", "Name", "Lastname", "Gender", "Work", "Hometown", "Location", "Country"]
 			results_table.align = 'l'
 
-			for result in results:
+			for result in search_results:
 				results_table.add_row(
 					[
 						result['user_id'],
@@ -220,15 +221,15 @@ def banner():
 def main():
 	banner()
 
-	dbops = db.DatabaseOperations()
+	dbops = DatabaseOperations(db_file)
 	fls = FacebookLeakSearch(onion_service['url'])
 	cli = CommandLineInterface(fls=fls)
 
 	cli.ask_for_captcha_solution()
 	search_params = cli.ask_for_search_params()
 
-	print("[*] Performing DB search")
-	search_results = self.fls.perform_search(**search_params)
+	print("[*] Performing Search on Hidden Service")
+	search_results = fls.perform_search(*search_params)
 
 	cli.present_results(search_results)
 
