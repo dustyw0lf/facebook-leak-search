@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 from prettytable import PrettyTable
-from db import *
 
 """
 	Facebook 2021 Leak Search
@@ -14,7 +13,6 @@ from db import *
 
 # CONFIG #################
 tor_socks_proxy_port = 9050
-db_file = 'db.sqlite3'
 onion_service = {
 	# URL of the Onion service
 	'url':'4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion',
@@ -221,17 +219,18 @@ def banner():
 def main():
 	banner()
 
-	dbops = DatabaseOperations(db_file)
 	fls = FacebookLeakSearch(onion_service['url'])
 	cli = CommandLineInterface(fls=fls)
 
 	cli.ask_for_captcha_solution()
-	search_params = cli.ask_for_search_params()
 
-	print("[*] Performing Search on Hidden Service")
-	search_results = fls.perform_search(*search_params)
+	while True:
+		search_params = cli.ask_for_search_params()
 
-	cli.present_results(search_results)
+		print("[*] Performing 'API' Search")
+		search_results = fls.perform_search(*search_params)
+
+		cli.present_results(search_results)
 
 	"""
 	TODO:
