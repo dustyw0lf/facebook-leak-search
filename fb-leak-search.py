@@ -204,6 +204,52 @@ class CommandLineInterface():
 
 			print(results_table)
 
+	def ask_how_to_continue(self, search_results):
+		print("[*] How would you like to continue?")
+		print("    1 - Export results")
+		print("    2 - Search again")
+		print("    3 - Quit")
+		choice = input("[*] Enter your choice: ")
+
+		if choice == '1':
+			self.export_results(search_results)
+		elif choice == '2':
+			pass
+		elif choice == '3':
+			quit()
+		else:
+			print("[*] Please choose one of the options :)")
+			self.how_to_continue()
+
+	def export_results(self, search_results):
+		print("[*] In which format you want to export the results?")
+		print("    1 - JSON")
+		print("    2 - CSV")
+		print("    3 - Text")
+		choice = input("[*] Enter your choice: ")
+
+		# Appendix for files so we dont overwrite previous files...
+		timestamp = int(time.time())
+
+		if choice == '1':
+			filename = 'fbls_{0}.json'.format(timestamp)
+			with open(filename, 'w') as f:
+				f.write(json.dumps(search_results))
+			print("[*] Exported {0} results as JSON (Filename: {1})".format(len(search_results), filename))
+		elif choice == '2':
+			filename = 'fbls_{0}.csv'.format(timestamp)
+			print("[*] Exported {0} results as CSV (Filename: {1})".format(len(search_results), filename))
+		elif choice == '3':
+			filename = 'fbls_{0}.txt'.format(timestamp)
+			print("[*] Exported {0} results as Text (Filename: {1})".format(len(search_results), filename))
+		else:
+			print("[*] Please choose one of the options :)")
+			self.export_results()
+
+
+def quit():
+	print("[*] Quitting FBLS")
+	exit()
 
 def banner():
 	print(" ________  ______   _____      ______   ")
@@ -231,6 +277,7 @@ def main():
 		search_results = fls.perform_search(*search_params)
 
 		cli.present_results(search_results)
+		cli.ask_how_to_continue(search_results)
 
 	"""
 	TODO:
