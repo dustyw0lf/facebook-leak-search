@@ -1,6 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
 from prettytable import PrettyTable
+import json
+import csv
+import time
 
 """
 	Facebook 2021 Leak Search
@@ -180,7 +183,7 @@ class CommandLineInterface():
 		"""
 
 		if len(search_results) == 0:
-			print("[*] The search was successful but it returned 0 results :(")
+			print("[!] The search was successful but it returned 0 results :(")
 		else:
 			print("[*] Success! {0} results have been found!".format(len(search_results)))
 			results_table = PrettyTable()
@@ -205,6 +208,9 @@ class CommandLineInterface():
 			print(results_table)
 
 	def ask_how_to_continue(self, search_results):
+		""" Ask the user how he would like to continue after the search.
+		"""
+
 		print("[*] How would you like to continue?")
 		print("    1 - Export results")
 		print("    2 - Search again")
@@ -222,10 +228,12 @@ class CommandLineInterface():
 			self.how_to_continue()
 
 	def export_results(self, search_results):
+		""" Ask the user how he wants to export the search results.
+		"""
+
 		print("[*] In which format you want to export the results?")
 		print("    1 - JSON")
 		print("    2 - CSV")
-		print("    3 - Text")
 		choice = input("[*] Enter your choice: ")
 
 		# Appendix for files so we dont overwrite previous files...
@@ -234,17 +242,18 @@ class CommandLineInterface():
 		if choice == '1':
 			filename = 'fbls_{0}.json'.format(timestamp)
 			with open(filename, 'w') as f:
-				f.write(json.dumps(search_results))
+				f.write(json.dumps(search_results, indent=4, sort_keys=True))
 			print("[*] Exported {0} results as JSON (Filename: {1})".format(len(search_results), filename))
 		elif choice == '2':
 			filename = 'fbls_{0}.csv'.format(timestamp)
+			with open(filename, 'w') as f:
+				w = csv.DictWriter(f, search_results.keys())
+				w.writeheader()
+				w.writerow(search_results)
 			print("[*] Exported {0} results as CSV (Filename: {1})".format(len(search_results), filename))
-		elif choice == '3':
-			filename = 'fbls_{0}.txt'.format(timestamp)
-			print("[*] Exported {0} results as Text (Filename: {1})".format(len(search_results), filename))
 		else:
 			print("[*] Please choose one of the options :)")
-			self.export_results()
+			self.export_results(search_results)
 
 
 def quit():
@@ -277,7 +286,8 @@ def main():
 		search_results = fls.perform_search(*search_params)
 
 		cli.present_results(search_results)
-		cli.ask_how_to_continue(search_results)
+		if len(search_results) > 0:
+			cli.ask_how_to_continue(search_results)
 
 	"""
 	TODO:
@@ -296,4 +306,8 @@ def main():
 
 
 if __name__ == '__main__':
-	main()
+	try:
+		main()
+	except KeyboardInterrupt:
+		print("[!] Execution interrupted with keyboard...")
+		quit()
