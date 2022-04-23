@@ -230,7 +230,7 @@ class CommandLineInterface():
 	def export_results(self, search_results):
 		""" Ask the user how he wants to export the search results.
 		"""
-
+		
 		print("[*] In which format you want to export the results?")
 		print("    1 - JSON")
 		print("    2 - CSV")
@@ -289,25 +289,11 @@ def main():
 		if len(search_results) > 0:
 			cli.ask_how_to_continue(search_results)
 
-	"""
-	TODO:
-	- Separate CLI from API Interactions (2 Classes)
-	- Implement Key Rotation for Authentication ID
-
-	Additional Features:
-	- Maybe add way to save results to DB for further browsing
-	- Implement way to show how many search queries are left (it's in the page source)
-	- Automatic re-auth of captcha after 50 queries used
-	- Possibility of solving multiple captchas at first and key rotation afterwards
-	- Possibility of processing lists
-	- Implement Facebook Profile URL to ID converter
-
-	"""
-
 
 if __name__ == '__main__':
 	try:
 		main()
 	except KeyboardInterrupt:
+		print()
 		print("[!] Execution interrupted with keyboard...")
 		quit()
