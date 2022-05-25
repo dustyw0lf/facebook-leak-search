@@ -268,7 +268,8 @@ def banner():
 	print(" _| |_     _| |__) |_| |__/ || \\____) |")
 	print("|_____|   |_______/|________| \\______.'")
 	print()
-	print("Facebook Leak Search - Author: @curosim")
+	print("Facebook Leak Search - CLI Wrapper for the hidden service FB Leak Search")
+	print("Author of the CLI Wrapper: @curosim")
 	print()
 
 def main():
