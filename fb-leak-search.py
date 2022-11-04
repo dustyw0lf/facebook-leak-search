@@ -15,7 +15,7 @@ import time
 """
 
 # CONFIG #################
-tor_socks_proxy_port = 9050
+tor_socks_proxy_port = 9150
 onion_service = {
 	# URL of the Onion service
 	'url':'4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion',
@@ -225,7 +225,7 @@ class CommandLineInterface():
 			quit()
 		else:
 			print("[*] Please choose one of the options :)")
-			self.how_to_continue()
+			self.ask_how_to_continue()
 
 	def export_results(self, search_results):
 		""" Ask the user how he wants to export the search results.
@@ -268,7 +268,7 @@ def banner():
 	print(" _| |_     _| |__) |_| |__/ || \\____) |")
 	print("|_____|   |_______/|________| \\______.'")
 	print()
-	print("Facebook Leak Search - CLI Wrapper for the hidden service FB Leak Search")
+	print("Facebook Leak Search - CLI Wrapper for the hidden service \"Fuck Facebook (TM)\"")
 	print("Author of the CLI Wrapper: @curosim")
 	print()
 
