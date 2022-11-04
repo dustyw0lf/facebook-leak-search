@@ -309,7 +309,7 @@ def main():
 	cli = CommandLineInterface(fls=fls)
 
 	if fls.connectivity_check() == False:
-		print("[!] Tor not working or hidden service not reachable")
+		print("[!] Tor not working or hidden service not reachable (Local Tor ports tried: {0})".format(config['tor_socks_proxy_ports']))
 	else:
 		cli.ask_for_captcha_solution()
 
