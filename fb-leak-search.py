@@ -10,15 +10,17 @@ import time
 	Author: @curosim
 
 	About the script:
-	I must admit it looks a little too complicated for what it does. But keep in mind the script was written for interactive usage.
+	I must admit it looks a little too complicated for what it does, but keep in mind the script was written for interactive usage.
 	The captcha on the website is lovely - because of that and out of respect for the service operator, it's implemented in the script instead of solved automatically.
 """
 
 # CONFIG #################
-tor_socks_proxy_port = 9150
-onion_service = {
+config = {
 	# URL of the Onion service
 	'url':'4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion',
+
+	# Tor socks proxy ports
+	'tor_socks_proxy_ports':[9050, 9150]
 
 	# To find the captcha box, we search the HTML for the style attribute with following content.
 	'captcha_style':'border: 1px solid black;display: inline-block;margin: 0px; padding:0px;',
@@ -28,18 +30,21 @@ onion_service = {
 
 	# Results table style attribute content
 	'results_table_style':'min-width: 50%'
+
+	# Data Export Path
+	'data_export_path':'./exports/'
 }
 ##########################
 
 
-def get_tor_session():
+def get_tor_session(port):
 	""" Returns a requests session with the tor service set as socks proxy.
 	"""
 	session = requests.session()
 
 	# It's important to use the protocol 'socks5h' in order to enable remote DNS resolving
-	session.proxies['http'] = 'socks5h://localhost:{0}'.format(tor_socks_proxy_port)
-	session.proxies['https'] = 'socks5h://localhost:{0}'.format(tor_socks_proxy_port)
+	session.proxies['http'] = 'socks5h://localhost:{0}'.format(port)
+	session.proxies['https'] = 'socks5h://localhost:{0}'.format(port)
 	return session
 
 class FacebookLeakSearch():
@@ -48,6 +53,28 @@ class FacebookLeakSearch():
 	def __init__(self, onion_address):
 		self.session = get_tor_session()
 		self.hidden_service_url = 'http://{0}'.format(onion_address)
+
+	def set_tor_session(self, port):
+		""" Create requests session with TOR as proxy.
+		"""
+		self.session = get_tor_session(port)
+
+	def connectivity_check(self):
+		""" Check if TOR proxy works and the hidden service is up and running.
+		"""
+		with port in config['tor_socks_proxy_ports']:
+			self.set_tor_session(port)
+			if self.is_onion_reachable: return True
+		return False
+
+	def is_onion_reachable(self):
+		""" Make request to hidden service to see if it's working.
+		"""
+		resp = self.session.get(self.hidden_service_url)
+		if "<title>Fuck Facebook (TM)</title>" in resp.text:
+			return True
+		else:
+			return False
 
 	def initial_request(self):
 		""" Simply for the first request in order to get the page source for the captcha.
@@ -58,7 +85,7 @@ class FacebookLeakSearch():
 	def is_captcha_present(self, source):
 		""" Checks if the captcha is present in the HTML source.
 		"""
-		if onion_service['captcha_present_text'] in source:
+		if config['captcha_present_text'] in source:
 			return True
 		else:
 			return False
@@ -67,7 +94,7 @@ class FacebookLeakSearch():
 		""" The HTML source gets passed and the captcha text + hidden key will be extracted from it.
 		"""
 		soup = BeautifulSoup(source, 'html.parser')
-		captcha_text = soup.find('pre', attrs={'style':onion_service['captcha_style']}).text
+		captcha_text = soup.find('pre', attrs={'style':config['captcha_style']}).text
 		hidden_key = soup.find('input', attrs={'type':'hidden','name':'id'}).get('value')
 		return captcha_text, hidden_key
 
@@ -245,7 +272,7 @@ class CommandLineInterface():
 				f.write(json.dumps(search_results, indent=4, sort_keys=True))
 			print("[*] Exported {0} results as JSON (Filename: {1})".format(len(search_results), filename))
 		elif choice == '2':
-			filename = 'fbls_{0}.csv'.format(timestamp)
+			filename = '{0}fbls_{0}.csv'.format(data_export_path, timestamp)
 			keys = list(search_results[0].keys())
 			with open(filename, 'w') as f:
 				w = csv.DictWriter(f, keys)
@@ -277,20 +304,23 @@ def banner():
 def main():
 	banner()
 
-	fls = FacebookLeakSearch(onion_service['url'])
+	fls = FacebookLeakSearch(config['url'])
 	cli = CommandLineInterface(fls=fls)
 
-	cli.ask_for_captcha_solution()
+	if fls.connectivity_check() == False:
+		print("[!] Tor not working or hidden service not reachable")
+	else:
+		cli.ask_for_captcha_solution()
 
-	while True:
-		search_params = cli.ask_for_search_params()
+		while True:
+			search_params = cli.ask_for_search_params()
 
-		print("[*] Performing 'API' Search")
-		search_results = fls.perform_search(*search_params)
+			print("[*] Performing 'API' Search")
+			search_results = fls.perform_search(*search_params)
 
-		cli.present_results(search_results)
-		if len(search_results) > 0:
-			cli.ask_how_to_continue(search_results)
+			cli.present_results(search_results)
+			if len(search_results) > 0:
+				cli.ask_how_to_continue(search_results)
 
 
 if __name__ == '__main__':
