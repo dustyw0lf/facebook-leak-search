@@ -271,12 +271,12 @@ class CommandLineInterface():
 		timestamp = int(time.time())
 
 		if choice == '1':
-			filename = '{0}fbls_{0}.json'.format(config['data_export_path'], timestamp)
+			filename = '{0}fbls_{1}.json'.format(config['data_export_path'], timestamp)
 			with open(filename, 'w') as f:
 				f.write(json.dumps(search_results, indent=4, sort_keys=True))
 			print("[*] Exported {0} results as JSON (Filename: {1})".format(len(search_results), filename))
 		elif choice == '2':
-			filename = '{0}fbls_{0}.csv'.format(config['data_export_path'], timestamp)
+			filename = '{0}fbls_{1}.csv'.format(config['data_export_path'], timestamp)
 			keys = list(search_results[0].keys())
 			with open(filename, 'w') as f:
 				w = csv.DictWriter(f, keys)
