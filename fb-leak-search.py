@@ -20,7 +20,7 @@ config = {
 	'url':'4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion',
 
 	# Tor socks proxy ports
-	'tor_socks_proxy_ports':[9050, 9150]
+	'tor_socks_proxy_ports':[9050, 9150],
 
 	# To find the captcha box, we search the HTML for the style attribute with following content.
 	'captcha_style':'border: 1px solid black;display: inline-block;margin: 0px; padding:0px;',
@@ -29,7 +29,7 @@ config = {
 	'captcha_present_text':'fill in captcha!',
 
 	# Results table style attribute content
-	'results_table_style':'min-width: 50%'
+	'results_table_style':'min-width: 50%',
 
 	# Data Export Path
 	'data_export_path':'./exports/'
@@ -51,7 +51,6 @@ class FacebookLeakSearch():
 	authentication_id = None
 
 	def __init__(self, onion_address):
-		self.session = get_tor_session()
 		self.hidden_service_url = 'http://{0}'.format(onion_address)
 
 	def set_tor_session(self, port):
@@ -62,19 +61,21 @@ class FacebookLeakSearch():
 	def connectivity_check(self):
 		""" Check if TOR proxy works and the hidden service is up and running.
 		"""
-		with port in config['tor_socks_proxy_ports']:
+		for port in config['tor_socks_proxy_ports']:
 			self.set_tor_session(port)
-			if self.is_onion_reachable: return True
+			if self.is_onion_reachable():
+				print("[*] TOR running (Local Port: {0}) and hidden service reachable.".format(port))
+				return True
 		return False
 
 	def is_onion_reachable(self):
 		""" Make request to hidden service to see if it's working.
 		"""
-		resp = self.session.get(self.hidden_service_url)
-		if "<title>Fuck Facebook (TM)</title>" in resp.text:
-			return True
-		else:
-			return False
+		try:
+			resp = self.session.get(self.hidden_service_url)
+			if "<title>Fuck Facebook (TM)</title>" in resp.text: return True
+		except: pass
+		return False
 
 	def initial_request(self):
 		""" Simply for the first request in order to get the page source for the captcha.
