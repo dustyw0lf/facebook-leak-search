@@ -22,6 +22,9 @@ config = {
 	# Tor socks proxy ports
 	'tor_socks_proxy_ports':[9050, 9150],
 
+	# Connectivity Check text
+	'connectivity_check_text':'<title>Fuck Facebook (TM)</title>',
+
 	# To find the captcha box, we search the HTML for the style attribute with following content.
 	'captcha_style':'border: 1px solid black;display: inline-block;margin: 0px; padding:0px;',
 	
@@ -73,7 +76,7 @@ class FacebookLeakSearch():
 		"""
 		try:
 			resp = self.session.get(self.hidden_service_url)
-			if "<title>Fuck Facebook (TM)</title>" in resp.text: return True
+			if config['connectivity_check_text'] in resp.text: return True
 		except: pass
 		return False
 
@@ -268,12 +271,12 @@ class CommandLineInterface():
 		timestamp = int(time.time())
 
 		if choice == '1':
-			filename = 'fbls_{0}.json'.format(timestamp)
+			filename = '{0}fbls_{0}.json'.format(config['data_export_path'], timestamp)
 			with open(filename, 'w') as f:
 				f.write(json.dumps(search_results, indent=4, sort_keys=True))
 			print("[*] Exported {0} results as JSON (Filename: {1})".format(len(search_results), filename))
 		elif choice == '2':
-			filename = '{0}fbls_{0}.csv'.format(data_export_path, timestamp)
+			filename = '{0}fbls_{0}.csv'.format(config['data_export_path'], timestamp)
 			keys = list(search_results[0].keys())
 			with open(filename, 'w') as f:
 				w = csv.DictWriter(f, keys)
