@@ -225,12 +225,12 @@ class CommandLineInterface():
 			quit()
 		else:
 			print("[*] Please choose one of the options :)")
-			self.ask_how_to_continue()
+			self.ask_how_to_continue(search_results)
 
 	def export_results(self, search_results):
 		""" Ask the user how he wants to export the search results.
 		"""
-		
+
 		print("[*] In which format you want to export the results?")
 		print("    1 - JSON")
 		print("    2 - CSV")
@@ -246,10 +246,12 @@ class CommandLineInterface():
 			print("[*] Exported {0} results as JSON (Filename: {1})".format(len(search_results), filename))
 		elif choice == '2':
 			filename = 'fbls_{0}.csv'.format(timestamp)
+			keys = list(search_results[0].keys())
 			with open(filename, 'w') as f:
-				w = csv.DictWriter(f, search_results.keys())
+				w = csv.DictWriter(f, keys)
 				w.writeheader()
-				w.writerow(search_results)
+				for search_result in search_results:
+					w.writerow(search_result)
 			print("[*] Exported {0} results as CSV (Filename: {1})".format(len(search_results), filename))
 		else:
 			print("[*] Please choose one of the options :)")
