@@ -1,6 +1,8 @@
 # FBLS - facebook-leak-search
 Simple Python wrapper to query the Facebook 2021 Data Breach Leak Onion Service.
 
+## Usage:
+
 ### TODO:
 - Implement Key Rotation for Authentication ID
 
