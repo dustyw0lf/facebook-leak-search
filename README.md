@@ -3,6 +3,9 @@ Simple Python wrapper to query the Facebook 2021 Data Breach Leak Onion Service.
 
 ## Usage:
 
+Simply run the script in the command line.
+It's interactive, no parameters needed.
+
 ### TODO:
 - Implement Key Rotation for Authentication ID
 
