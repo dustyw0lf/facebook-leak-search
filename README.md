@@ -13,7 +13,7 @@ Simply run the script in the command line.
 It's interactive, no parameters needed.
 
 ```
-python fbls.py
+python fb-leak-search.py
 ```
 
 ### Additional Features which could be implemented in the future:
