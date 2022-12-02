@@ -21,7 +21,12 @@ It's interactive, no parameters needed.
 python fb-leak-search.py
 ```
 
-### Additional Features which could be implemented in the future:
+
+
+
+
+
+###### Additional Features which could be implemented in the future:
 - Implement Key Rotation for Authentication ID
 - Implement way to show how many search queries are left (it's in the page source)
 - Automatic re-auth of captcha after 50 queries used
