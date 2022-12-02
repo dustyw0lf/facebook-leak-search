@@ -1,13 +1,13 @@
 # FBLS - facebook-leak-search
 Simple Python wrapper to query the Facebook 2021 Data Breach Leak Onion Service.
 
+[![asciicast](https://asciinema.org/a/3yPXQ6IiQCnP9UNbKUi1x2qjI.svg)](https://asciinema.org/a/3yPXQ6IiQCnP9UNbKUi1x2qjI)
+
 **Onion Service:**
 ```
 4wbwa6vcpvcr3vvf4qkhppgy56urmjcj2vagu2iqgp3z656xcmfdbiqd.onion
 ```
 ***Info**: I dont know who runs the hidden service nor am I affiliated in any way. Query it with care.*
-
-[![asciicast](https://asciinema.org/a/3yPXQ6IiQCnP9UNbKUi1x2qjI.svg)](https://asciinema.org/a/3yPXQ6IiQCnP9UNbKUi1x2qjI)
 
 
 ### Installation:
@@ -23,11 +23,6 @@ It's interactive, no parameters needed.
 ```
 python fb-leak-search.py
 ```
-
-
-
-
-
 
 ###### Additional Features which could be implemented in the future:
 - Implement Key Rotation for Authentication ID
