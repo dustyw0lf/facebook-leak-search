@@ -11,8 +11,11 @@ Simple Python wrapper to query the Facebook 2021 Data Breach Leak Onion Service.
 
 
 ### Installation:
+On Mac and Linux, use "python3" instead of "python".
 ```
 git clone https://github.com/curosim/facebook-leak-search
+cd facebook-leak-search
+python -m pip install -r requirements.txt
 ```
 
 ### Usage:
