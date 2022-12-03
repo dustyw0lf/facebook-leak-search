@@ -1,9 +1,11 @@
+import csv
+import json
+import time
+from pathlib import Path
+
 import requests
 from bs4 import BeautifulSoup
 from prettytable import PrettyTable
-import json
-import csv
-import time
 
 """
 	Facebook 2021 Leak Search
@@ -270,6 +272,9 @@ class CommandLineInterface():
 		# Appendix for files so we dont overwrite previous files...
 		timestamp = int(time.time())
 
+		# Create directory to export files to
+		Path(config['data_export_path']).mkdir(exist_ok=True)
+  
 		if choice == '1':
 			filename = '{0}fbls_{1}.json'.format(config['data_export_path'], timestamp)
 			with open(filename, 'w') as f:
